@@ -29,7 +29,7 @@ void *malloc(size_t size) {
 
     block = findFreeBlock(size);
     if(block != NULL) {
-      return block;
+      return (void *)block + 1;
     }
 
     // We are here means no block was found in free list.
