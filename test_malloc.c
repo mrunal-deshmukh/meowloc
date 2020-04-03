@@ -1,6 +1,6 @@
 #include <stdio.h>
-//#include "malloc.c"
-#include <stdlib.h>
+#include "malloc.c"
+//#include <stdlib.h>
 #define NUM_ITERATIONS 10000
 int main() {
 
