@@ -34,7 +34,7 @@ void *malloc(size_t size) {
         global_base = block;
         return (block + 1);
     } else {
-        struct HeaderBlock *last = global_base;
+        struct BlockHeader *last = global_base;
         block = findFreeBlock(size,&last);
         if (!block) { // Failed to find free block.
             block = request_space(last, size);
@@ -42,7 +42,7 @@ void *malloc(size_t size) {
                 return NULL;
             }
         } else{
-            printf("found free block for size=%d",size);
+            //printf("found free block for size=%d",size);
         }
         return (block + 1);
     }
