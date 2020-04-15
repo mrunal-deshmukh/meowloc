@@ -41,11 +41,11 @@ size_t calculateAvailableSpace();
 
 void *malloc(size_t size) {
     struct BlockHeader *block;
-    
+
     if (size <=0) {
         return NULL;
     }
-    
+
     if (size >= PAGE_SIZE) {
         block = getBlockFromSystem(size);
         if (block) {
@@ -53,24 +53,24 @@ void *malloc(size_t size) {
         }
         return NULL;
     }
-    
+
     // step 1: try to get from free list.
     block = findFreeBlock(size);
     if(block != NULL) {
         return (void *) (block + 1);
     }
-    
+
     // not found in free list.
     // Try to get from internal page.
     block = getBlockFromInternalPage(size);
-    
-    if (block) {
+
+    if (block != NULL) {
         return (void *) (block + 1);
     }
-    
+
     // request exact size from OS using sbrk here.
     block = getBlockFromSystem(size);
-    
+
     if (!block) {
         return NULL;
     }
@@ -89,7 +89,7 @@ int shouldRequestNewPage(size_t size) {
     if (CURR_PAGE_BASE == NULL) {
         return TRUE;
     }
-    
+
     size_t actualRequiredSize = size + META_SIZE;
     size_t availableSpace = calculateAvailableSpace();
     if (availableSpace < actualRequiredSize) {
@@ -106,12 +106,12 @@ struct BlockHeader *getBlockFromInternalPage(size_t size) {
             return NULL;
         }
     }
-    
+
     // carve out block from existing page and update related global BASE.
     struct BlockHeader *block = (BlockHeader*) CURR_PAGE_BASE;
     size_t requiredSize = size + META_SIZE;
     CURR_PAGE_BASE += requiredSize;
-    
+
     block->size = size;
     block->is_free = 0;
     block->next = NULL;
@@ -125,7 +125,7 @@ struct BlockHeader *getBlockFromSystem(size_t size) {
     if (request == (void *) -1) {
         return NULL;
     }
-    
+
     block->size = size;
     block->is_free = 0;
     block->next = NULL;
@@ -145,15 +145,15 @@ struct BlockHeader *findFreeBlock(size_t size) {
 
 int requestNewPage(){
     void *oldBreakPoint = sbrk(0);
-    
+
     //Request the whole page
     void *request = sbrk(PAGE_SIZE);
     if (request == (void *) - 1 || request == NULL) {
         return FALSE;
     }
-    
+
     CURR_PAGE_BASE = oldBreakPoint;
-    CURR_PAGE_END = request;
+    CURR_PAGE_END = oldBreakPoint + PAGE_SIZE;
     return TRUE;
 }
 
@@ -169,4 +169,3 @@ void free(void *p) {
         FREE_LIST = blockToFree;
     }
 }
-
